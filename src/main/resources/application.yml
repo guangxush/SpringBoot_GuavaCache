@@ -15,7 +15,18 @@ spring:
   # Mysql data source
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/test?useSSL=false
+    username: root
+    password: root
   jpa:
+    show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL5Dialect
+
+# guava
+guava:
+  cache:
+    maximumSize: 10000
+    expire: 15
+
