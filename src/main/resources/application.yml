@@ -1,0 +1,21 @@
+# base URL
+
+server:
+  port: 8080
+  servlet:
+    context-path: /booksys
+    multipart:
+      max-file-size: 20M
+      max-request-size: 20M
+
+# spring
+spring:
+  resources:
+    static-locations: classpath:/
+  # Mysql data source
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5Dialect
