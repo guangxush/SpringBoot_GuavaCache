@@ -32,25 +32,12 @@ public class BookServiceImplTest {
 
     private final static Long DEFAULT_BOOK_ID1 = 1L;
 
-    @InjectMocks
+    @Mock
     private BookServiceImpl bookServiceMock;
 
     @Mock
     private BookRepo bookRepoMock;
 
-    @Before
-    public void initUserService() {
-        doAnswer(invocation -> {
-            Object[] arguments = invocation.getArguments();
-            if (arguments != null && arguments.length > 0 && arguments[0] != null) {
-                Long uid = (Long) arguments[0];
-                Book vo = new Book();
-                vo.setId(uid);
-                return vo;
-            }
-            return null;
-        }).when(bookServiceMock).fetchBookById(Mockito.anyLong());
-    }
 
     @Test
     public void fetchBookByIdTest(){
@@ -74,10 +61,11 @@ public class BookServiceImplTest {
                 return book;
             }
             return null;
-        }).when(bookServiceMock).fetchBookById(DEFAULT_BOOK_ID1);
+        }).when(bookServiceMock).fetchBookById(anyLong());
 
-        bookServiceMock.fetchBookById(DEFAULT_BOOK_ID1);
-        verify(bookRepoMock, times(1)).findAllByIdInAndDeletedEqualsAndReviewStatusEquals(ids, false, ReviewTypeEnum.PASS);
+        bookServiceMock.fetchBookById(anyLong());
+        //直接从DB中取值，没有查询数据库
+        verify(bookRepoMock, times(0)).findAllByIdInAndDeletedEqualsAndReviewStatusEquals(ids, false, ReviewTypeEnum.PASS);
     }
 
 }
