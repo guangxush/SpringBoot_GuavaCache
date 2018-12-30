@@ -19,7 +19,6 @@ import java.util.Date;
 @Data
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
 @Table(name = "book")
 public class Book {
     /**
@@ -67,4 +66,14 @@ public class Book {
     @Column(name = "review_status")
     @Convert(converter = ReviewTypeEnum.Converter.class)
     private ReviewTypeEnum reviewStatus;
+
+    public Book(String name, String author, String publishHouse) {
+        this.name = name;
+        this.author = author;
+        this.publishHouse = publishHouse;
+    }
+
+    public Book(){
+
+    }
 }

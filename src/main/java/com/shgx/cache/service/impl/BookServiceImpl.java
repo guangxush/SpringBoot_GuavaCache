@@ -2,20 +2,27 @@ package com.shgx.cache.service.impl;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
+import com.google.common.cache.CacheStats;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Lists;
 import com.shgx.cache.model.Book;
+import com.shgx.cache.model.BookVO;
 import com.shgx.cache.repository.BookRepo;
 import com.shgx.cache.service.BookService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import static com.shgx.cache.constant.BookConstant.*;
+
 @Service
+@Slf4j
 public class BookServiceImpl implements BookService {
     @Autowired
     BookRepo bookRepo;
@@ -24,7 +31,7 @@ public class BookServiceImpl implements BookService {
     @Value("${guava.cache.expire}")
     private Long expireDays;
 
-    private LoadingCache<Long, Book> userPassportsCache = CacheBuilder.newBuilder()
+    private LoadingCache<Long, Book> booksCache = CacheBuilder.newBuilder()
             .recordStats()
             .maximumSize(1000)
             .expireAfterAccess(10, TimeUnit.DAYS)
@@ -32,43 +39,48 @@ public class BookServiceImpl implements BookService {
                     new CacheLoader<Long, Book>() {
                         @Override
                         public Book load(Long id) throws Exception {
-                            List<Book> userPassportVOList = requestUsersByUid(Collections.singletonList(id));
-                            if (userPassportVOList != null) {
-                                return userPassportVOList.get(0);
+                            List<Book> bookVOList = findAllBookById(Collections.singletonList(id));
+                            if (bookVOList != null) {
+                                return bookVOList.get(0);
                             }
-                            return new UserPassportVO(id, DEFAULT_NICKNAME, DEFAULT_ICON);
+                            return new Book(BOOK_NAME, BOOK_AUTHOR, PUBLISH_HOUSE);
                         }
                     }
             );
-    }
+
     @Override
-    public UserPassportVO fetchUserByUid(Long uid) {
-        if(uid == null) {
-            if (uid == null) {
-                log.error("the uid is null");
-                throw new LemonInternalError("the uid is null");
+    public Book fetchBookByUid(Long uid) {
+        if (uid == null) {
+            log.error("the uid is null");
+            throw new NullPointerException("the uid is null");
+        }
+        //从缓存中获取
+        try {
+            Book book = booksCache.get(uid);
+            if(book!=null){
+                return book;
             }
-            List<UserPassportVO> vos = requestUsersByUid(Lists.newArrayList(uid));
-            if(vos.isEmpty()){
-                UserPassportVO vo = new UserPassportVO();
-                vo.setUid( uid);
-                vo.setNickname(DEFAULT_NICKNAME);
-                vo.setIcon(DEFAULT_ICON);
-                return vo;
-                UserPassportVO vo = null;
-                try {
-                    vo = userPassportsCache.get(uid);
-                } catch (ExecutionException e) {
-                    log.error("take userPassport from guava cacahe error, uid : {}", uid, e);
-                }
-                return vos.get(0);
-                return vo;
-            }
+        } catch (ExecutionException e) {
+            log.error("take userPassport from guava cacahe error, uid : {}", uid, e);
+        }
+        //从数据库中查询
+        List<Book> vos = findAllBookById(Lists.newArrayList(uid));
+        if (vos.isEmpty()) {
+            //返回默认值
+            Book book = new Book();
+            book.setId(uid);
+            book.setName(BOOK_NAME);
+            book.setAuthor(BOOK_AUTHOR);
+            book.setPublishHouse(PUBLISH_HOUSE);
+            return book;
+        }
+        return vos.get(0);
+    }
 
 
 
 
-            @Override
+    @Override
     public Book findBookInfoById(Long id){
         Book book = null;
         Optional<Book> bookOptional = bookRepo.findById(id);
@@ -77,4 +89,26 @@ public class BookServiceImpl implements BookService {
         }
         return book;
     }
+
+    @Override
+    public List<Book> findAllBookById(List<Long> ids){
+        List<Book> books = new ArrayList<>();
+        Optional<List<Book>> booksOption = Optional.ofNullable(bookRepo.findAllById(ids));
+        if(booksOption.isPresent()) {
+            books = booksOption.get();
+        }
+        return books;
+    }
+
+    /**
+     * 将缓存状态定时记录在日志中
+     * @param
+     * @return
+     */
+    @Scheduled(fixedRate = 1000 * 60 * 5)
+    private void recordCacheStatus() {
+        CacheStats stats = booksCache.stats();
+        log.info("guava cache status : {}", stats.toString());
+    }
+
 }

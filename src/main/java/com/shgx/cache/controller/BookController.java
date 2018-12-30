@@ -18,11 +18,12 @@ public class BookController {
 
     @RequestMapping(path = "/{id}", method = RequestMethod.GET)
     public Book findBookInfoById(@PathVariable("id")Long id){
-        Book book = bookService.findBookInfoById(id);
+        Book book = bookService.fetchBookByUid(id);
         if(book!=null){
             return book;
         }else{
             return null;
         }
     }
+
 }
