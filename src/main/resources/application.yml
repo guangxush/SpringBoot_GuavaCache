@@ -14,7 +14,7 @@ spring:
     static-locations: classpath:/
   # Mysql data source
   datasource:
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/test?useSSL=false
     username: root
     password: root

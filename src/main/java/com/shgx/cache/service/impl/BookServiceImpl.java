@@ -7,6 +7,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
 import com.shgx.cache.enums.ReviewTypeEnum;
 import com.shgx.cache.model.Book;
+import com.shgx.cache.model.BookVO;
 import com.shgx.cache.repository.BookRepo;
 import com.shgx.cache.service.BookService;
 import lombok.extern.slf4j.Slf4j;
@@ -54,33 +55,52 @@ public class BookServiceImpl implements BookService {
                     }
             );
 
+    private LoadingCache<List<Long>, List<Book>> bookVOsCache = CacheBuilder.newBuilder()
+            .recordStats()
+            .maximumSize(1000)
+            .expireAfterAccess(10, TimeUnit.DAYS)
+            .build(
+                    new CacheLoader<List<Long>, List<Book>>() {
+                        @Override
+                        public List<Book> load(List<Long> ids) throws Exception {
+                            List<Book> bookVOList = findAllBookById(ids);
+                            if (bookVOList != null && bookVOList.size() != 0) {
+                                return bookVOList;
+                            }
+                            //设置一个默认值
+                            bookVOList.add(new Book(BOOK_NAME, BOOK_AUTHOR, PUBLISH_HOUSE));
+                            return bookVOList;
+                        }
+                    }
+            );
+
     /**
      * 获取书籍信息
      *
-     * @param uid
+     * @param id
      * @return
      */
     @Override
-    public Book fetchBookById(Long uid) {
-        if (uid == null) {
-            log.error("the uid is null");
-            throw new NullPointerException("the uid is null");
+    public Book fetchBookById(Long id) {
+        if (id == null) {
+            log.error("the id is null");
+            throw new NullPointerException("the id is null");
         }
         //从缓存中获取
         try {
-            Book book = booksCache.get(uid);
+            Book book = booksCache.get(id);
             if (book != null) {
                 return book;
             }
         } catch (ExecutionException e) {
-            log.error("take userPassport from guava cacahe error, uid : {}", uid, e);
+            log.error("take book from guava cache error, id : {}", id, e);
         }
         //从数据库中查询
-        List<Book> vos = findAllBookById(Lists.newArrayList(uid));
+        List<Book> vos = findAllBookById(Lists.newArrayList(id));
         if (vos.isEmpty()) {
             //返回默认值
             Book book = new Book();
-            book.setId(uid);
+            book.setId(id);
             book.setName(BOOK_NAME);
             book.setAuthor(BOOK_AUTHOR);
             book.setPublishHouse(PUBLISH_HOUSE);
@@ -119,6 +139,48 @@ public class BookServiceImpl implements BookService {
             books = booksOption.get();
         }
         return books;
+    }
+
+    /**
+     * 查询所有审核通过的书籍
+     *
+     * @param ids
+     * @return
+     */
+    @Override
+    public List<BookVO> findBooksByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty() || ids.size() == 0) {
+            log.error("the ids is null");
+            throw new NullPointerException("the ids is null");
+        }
+        List<BookVO> bookVOS = new ArrayList<>();
+        List<Book> books = new ArrayList<>();
+        //从缓存中获取
+        try {
+            List<Book> booksCache = bookVOsCache.get(ids);
+            if (booksCache != null) {
+                books = booksCache;
+            }
+        } catch (ExecutionException e) {
+            log.error("take books from guava cache error, ids : {}", ids, e);
+        }
+        //从数据库中查询
+        if (books.isEmpty() && books.size() < 0) {
+            books = findAllBookById(ids);
+        }
+        if (!books.isEmpty() && books.size() > 0) {
+            for (Book book : books) {
+                bookVOS.add(
+                        BookVO.builder()
+                                .name(book.getName())
+                                .author(book.getAuthor())
+                                .publishDate(book.getPublishDate())
+                                .publishHouse(book.getPublishHouse())
+                                .build()
+                );
+            }
+        }
+        return bookVOS;
     }
 
     /**

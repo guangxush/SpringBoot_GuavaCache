@@ -17,10 +17,6 @@ import java.util.Date;
 @NoArgsConstructor
 public class BookVO {
     /**
-     * 书籍id
-     */
-    private Long id;
-    /**
      * 书籍名称
      */
     private String name;
@@ -28,10 +24,6 @@ public class BookVO {
      * 书籍作者
      */
     private String author;
-    /**
-     * 书籍数量
-     */
-    private Integer count;
     /**
      * 书籍出版日期
      */

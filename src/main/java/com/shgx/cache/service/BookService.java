@@ -1,6 +1,7 @@
 package com.shgx.cache.service;
 
 import com.shgx.cache.model.Book;
+import com.shgx.cache.model.BookVO;
 
 import java.util.List;
 /**
@@ -29,4 +30,11 @@ public interface BookService {
      * @return
      */
     Book fetchBookById(Long id);
+
+    /**
+     * 根据ID列表获取所有的书籍
+     * @param ids
+     * @return
+     */
+    List<BookVO> findBooksByIds(List<Long> ids);
 }
