@@ -9,6 +9,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * 常量定义
+ *
+ * @author guangxush
+ */
 @RestController
 @RequestMapping("/book")
 @Slf4j
@@ -18,7 +23,7 @@ public class BookController {
 
     @RequestMapping(path = "/{id}", method = RequestMethod.GET)
     public Book findBookInfoById(@PathVariable("id")Long id){
-        Book book = bookService.fetchBookByUid(id);
+        Book book = bookService.fetchBookById(id);
         if(book!=null){
             return book;
         }else{

@@ -6,7 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
-
+/**
+ * 书籍暴露给外部的字段
+ *
+ * @author guangxush
+ */
 @Data
 @Builder
 @AllArgsConstructor
@@ -27,7 +31,7 @@ public class BookVO {
     /**
      * 书籍数量
      */
-    private int count;
+    private Integer count;
     /**
      * 书籍出版日期
      */

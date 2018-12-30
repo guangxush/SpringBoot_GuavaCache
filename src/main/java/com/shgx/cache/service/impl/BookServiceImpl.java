@@ -5,8 +5,8 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.CacheStats;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Lists;
+import com.shgx.cache.enums.ReviewTypeEnum;
 import com.shgx.cache.model.Book;
-import com.shgx.cache.model.BookVO;
 import com.shgx.cache.repository.BookRepo;
 import com.shgx.cache.service.BookService;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +20,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import static com.shgx.cache.constant.BookConstant.*;
+
+/**
+ * 书籍服务实现
+ *
+ * @author guangxush
+ */
 
 @Service
 @Slf4j
@@ -40,7 +46,7 @@ public class BookServiceImpl implements BookService {
                         @Override
                         public Book load(Long id) throws Exception {
                             List<Book> bookVOList = findAllBookById(Collections.singletonList(id));
-                            if (bookVOList != null) {
+                            if (bookVOList != null && bookVOList.size() != 0) {
                                 return bookVOList.get(0);
                             }
                             return new Book(BOOK_NAME, BOOK_AUTHOR, PUBLISH_HOUSE);
@@ -48,8 +54,14 @@ public class BookServiceImpl implements BookService {
                     }
             );
 
+    /**
+     * 获取书籍信息
+     *
+     * @param uid
+     * @return
+     */
     @Override
-    public Book fetchBookByUid(Long uid) {
+    public Book fetchBookById(Long uid) {
         if (uid == null) {
             log.error("the uid is null");
             throw new NullPointerException("the uid is null");
@@ -57,7 +69,7 @@ public class BookServiceImpl implements BookService {
         //从缓存中获取
         try {
             Book book = booksCache.get(uid);
-            if(book!=null){
+            if (book != null) {
                 return book;
             }
         } catch (ExecutionException e) {
@@ -77,24 +89,33 @@ public class BookServiceImpl implements BookService {
         return vos.get(0);
     }
 
-
-
-
+    /**
+     * 根据ID查询某一本书籍
+     *
+     * @param id
+     * @return
+     */
     @Override
-    public Book findBookInfoById(Long id){
+    public Book findBookInfoById(Long id) {
         Book book = null;
         Optional<Book> bookOptional = bookRepo.findById(id);
-        if(bookOptional.isPresent()){
+        if (bookOptional.isPresent()) {
             book = bookOptional.get();
         }
         return book;
     }
 
+    /**
+     * 根据书籍id列表查询一系列书籍
+     *
+     * @param ids
+     * @return
+     */
     @Override
-    public List<Book> findAllBookById(List<Long> ids){
+    public List<Book> findAllBookById(List<Long> ids) {
         List<Book> books = new ArrayList<>();
-        Optional<List<Book>> booksOption = Optional.ofNullable(bookRepo.findAllById(ids));
-        if(booksOption.isPresent()) {
+        Optional<List<Book>> booksOption = bookRepo.findAllByIdInAndDeletedEqualsAndReviewStatusEquals(ids, false, ReviewTypeEnum.PASS);
+        if (booksOption.isPresent()) {
             books = booksOption.get();
         }
         return books;
@@ -102,6 +123,7 @@ public class BookServiceImpl implements BookService {
 
     /**
      * 将缓存状态定时记录在日志中
+     *
      * @param
      * @return
      */

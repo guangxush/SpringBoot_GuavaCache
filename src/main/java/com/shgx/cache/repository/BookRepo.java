@@ -7,7 +7,11 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-
+/**
+ * 数据库查询类
+ *
+ * @author guangxush
+ */
 @Repository
 public interface BookRepo extends JpaRepository<Book, Long> {
     /**

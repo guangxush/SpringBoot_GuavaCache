@@ -1,16 +1,20 @@
 package com.shgx.cache.enums;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-
+/**
+ * 审核枚举类型
+ *
+ * @author guangxush
+ */
 public enum ReviewTypeEnum implements Convertible<Integer>{
     /**
-     * 过审
+     * 书籍审核通过
      */
     PASS(0, "pass"), /**
-     * 未过审
+     * 书籍审核未过
      */
     REJECTED(1, "rejected"), /**
-     * 待审核
+     * 书籍待审核
      */
     UNKNOWN(2, "unknown");
     private int value;
