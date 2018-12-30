@@ -2,6 +2,13 @@ package com.shgx.cache.enums;
 
 import javax.persistence.AttributeConverter;
 
+/**
+ * 枚举转换成数据库中的字段
+ * @param <E>
+ * @param <T>
+ *
+ * @author guangxush
+ */
 public abstract class AbstractEnumConverter<E extends Enum<E> & Convertible<T>, T> implements AttributeConverter<E, T> {
 
     private final Class<E> clazz;
