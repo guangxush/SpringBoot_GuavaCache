@@ -4,6 +4,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.Weigher;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
 
@@ -12,8 +14,9 @@ import java.util.concurrent.TimeUnit;
  *
  * @author guangxush
  */
+@Configuration
 public abstract class CacheConfig<K, V> {
-    private LoadingCache<K, V> cache;
+    protected LoadingCache<K, V> cache;
 
     public CacheConfig() {
         cache = CacheBuilder.newBuilder()
@@ -100,7 +103,6 @@ public abstract class CacheConfig<K, V> {
      * 清除缓存数据，缓存清除后，数据会重新调用load方法获取
      *
      * @param k
-     * @author coshaho
      */
     public void refresh(K k) {
         cache.refresh(k);
