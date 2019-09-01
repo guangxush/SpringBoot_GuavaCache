@@ -12,9 +12,12 @@
   
  ### 基本原理
  - 如果某个请求需要频繁的去数据库中请求数据，当用户量较大且服务器性能较低的时候会导致服务效率低下，QPS较低
- ![image.png](https://upload-images.jianshu.io/upload_images/7632302-d562dc2a5e7edf92.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+ 
+ ![image.png](https://github.com/guangxush/iTechHeart/blob/master/image/GuavaCache/Guava1.png)
+ 
  - 这时我们可以把这些固定的请求，先用一个线程去数据库里面查询，然后把他放入缓存中，这样后序的线程再请求的时候就会直接从缓存中取数据，从而提高了查询性能也缓解了数据库的压力
- ![image.png](https://upload-images.jianshu.io/upload_images/7632302-78e2813339afb08d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+ 
+ ![image.png](https://github.com/guangxush/iTechHeart/blob/master/image/GuavaCache/Guava6.png)
  
  ### 什么时候使用缓存
  如果你的需求满足以下条件可以使用Cahce缓存数据
@@ -25,7 +28,8 @@
  ### 项目场景
  
  我们这里设计了一张图书信息表，用于查询，因为一般网站的主页上都会显示最新上架的一些图书，可以把这些固定的查询图书的信息放到缓存里，这里使用SpringBoot+Guava的技术方案；
- ![image.png](https://upload-images.jianshu.io/upload_images/7632302-41e0e82839033d21.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+ 
+ ![image.png](https://github.com/guangxush/iTechHeart/blob/master/image/GuavaCache/Guava2.png)
  
  ### 基本配置
  pom.xml引入依赖“
@@ -121,12 +125,12 @@
  ### 请求结果查看
  直接测试查询一本书的数据：http://localhost:8080/booksys/book/3
  第一次查询现实数据库查询语句
- ![image.png](https://upload-images.jianshu.io/upload_images/7632302-2925cc84db562847.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+ ![image.png](https://github.com/guangxush/iTechHeart/blob/master/image/GuavaCache/Guava3.png)
  
- ![](https://upload-images.jianshu.io/upload_images/7632302-1692b42942861cc6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+ ![](https://github.com/guangxush/iTechHeart/blob/master/image/GuavaCache/Guava4.png)
  
  第二次查询直接从内存中读取,SQL还是原来的一条
- ![image.png](https://upload-images.jianshu.io/upload_images/7632302-9dc10239d6f35b27.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+ ![image.png](https://github.com/guangxush/iTechHeart/blob/master/image/GuavaCache/Guava5.png)
  
  因此有了缓存，我们可以减少很多计算压力，提高应用程序的QPS。
  
